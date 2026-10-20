@@ -1,0 +1,12 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Cobrador",
+  "description": "Telegram collections agent for Argentine sellers: customers pay pesos by bank transfer through Ripio, and the agent settles every payment on Celo mainnet (wARS → USD₮ via Textile FX) straight to the seller's wallet.",
+  "services": [
+    { "name": "web", "endpoint": "https://github.com/lorenzo00005/cobrador" },
+    { "name": "wallet", "endpoint": "eip155:42220:0x8b9a7c5D0B83e984061A989C76f035e81E1E55f3" }
+  ],
+  "x402Support": false,
+  "active": true,
+  "supportedTrust": ["reputation"]
+}
