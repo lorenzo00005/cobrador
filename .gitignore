@@ -1,5 +1,6 @@
 node_modules
 .env*
+!.env.example
 .eve
 .vercel
 .next
@@ -8,3 +9,10 @@ node_modules
 dist
 .DS_Store
 *.tsbuildinfo
+.data/
+*.zip
+
+# versión vieja (primer intento con la API de Ripio) y skills locales de herramientas
+cobrador/
+.agents/
+.claude/
