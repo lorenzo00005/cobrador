@@ -45,8 +45,14 @@ Cobrador: ✅ Ya recibí la plata de remera: $15.000 ARS.
 | **Textile FX** | RFQ swap wARS → USD₮ on Celo mainnet ([`agent/lib/textile.ts`](agent/lib/textile.ts)). |
 | **Fee abstraction** | Gas is paid in **USD₮** through the USD₮ fee-currency adapter (`FEE_CURRENCY`): the agent wallet never needs CELO. |
 | **ERC-8021 attribution** | Every transaction is tagged with the entry's attribution code (`ATTRIBUTION_CODE`, see [`agent/lib/celo.ts`](agent/lib/celo.ts)). |
+| **ERC-8004 identity** | Agent **#9983** in the Celo Identity Registry, owned by the agent wallet ([registration file](agent-registration.json)). |
 
-Agent wallet: [`0x8b9a7c5D0B83e984061A989C76f035e81E1E55f3`](https://celoscan.io/address/0x8b9a7c5D0B83e984061A989C76f035e81E1E55f3)
+## Live on Celo mainnet
+
+- Agent wallet: [`0x8b9a7c5D0B83e984061A989C76f035e81E1E55f3`](https://celoscan.io/address/0x8b9a7c5D0B83e984061A989C76f035e81E1E55f3)
+- ERC-8004 registration: [`0x3f39d9e7…1783`](https://celoscan.io/tx/0x3f39d9e75f3739bd594681408975bb4e856ec5422184e652df39df0a06a61783)
+- USD₮ settlements to the seller's wallet: [`0xaa26e99d…831c`](https://celoscan.io/tx/0xaa26e99d50c8299e915e25d7bafb10004086402afd6382cf5a1ef2c52096831c),
+  [`0x7e0cd4d3…e389`](https://celoscan.io/tx/0x7e0cd4d3a652a1cb710bb427dc39eb8562215048df287fc6d420c37901b1e389)
 
 ## Guardrails
 
