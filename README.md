@@ -5,6 +5,8 @@
 > *Cobrador* ("the collector") is a Telegram agent for small Argentine sellers. Their customers pay in **pesos by
 > bank transfer**, and the agent settles every payment on **Celo mainnet**: **wARS → USD₮** through Textile FX,
 > sent straight to the seller's wallet. No exchange account, no manual conversion, no crypto knowledge needed.
+>
+> **Live demo:** https://lorenzo00005.github.io/cobrador/ (try the real checkout link the agent hands to customers)
 
 ## The problem
 
@@ -26,8 +28,8 @@ Cobrador: ✅ Ya recibí la plata de remera: $15.000 ARS.
              <wARS> wARS → <USD₮> USD₮ · Swap: celoscan.io/tx/… · Envío: celoscan.io/tx/…
 ```
 
-1. **Charge** — the agent registers the sale (product + amount) and hands out a payment destination: the seller's
-   own Ripio **CVU** (Ripio Ramps API) or a `ramp.ripio.com` link with the amount prefilled.
+1. **Charge** — the agent registers the sale (product + amount) and hands out a payment destination: a
+   `ramp.ripio.com` link with the amount prefilled, or the seller's own Ripio **CVU** (Ripio Ramps API, production).
 2. **Detect** — Ripio converts the pesos to **wARS** and delivers them to the agent wallet on Celo. The agent learns
    about it twice: from the Ripio API when the pesos arrive (matched to the sale by exact amount) and on-chain when
    the wARS land.
@@ -95,11 +97,12 @@ docker compose up -d --build
 
 `docker compose` starts the agent, a Cloudflare quick tunnel, and registers the Telegram webhook automatically.
 
-**Ripio modes.** With `RIPIO_CLIENT_ID`, `RIPIO_CLIENT_SECRET` and `RIPIO_CUSTOMER_ID` set, the agent charges through
-the seller's own CVU (Ripio Ramps API); otherwise it falls back to the `ramp.ripio.com` link. Ripio's sandbox only
-delivers `RTEST` on Ethereum Sepolia, so in sandbox the agent reports the delivery and skips the Celo settlement; in
-production (`RIPIO_ENV=production`) the wARS land on Celo and settle automatically. Try the sandbox from Telegram
-with *"simulá un pago de 5000"*.
+**Ripio modes.** By default the agent charges with a `ramp.ripio.com` link in Ripio's documented format
+(`?country=AR&chain=42220&token=WARS&amount=…&address=<agent wallet>`), which goes straight to Ripio's live on-ramp
+and delivers wARS on Celo mainnet. With the Ripio Ramps API in production (`RIPIO_ENV=production` plus
+`RIPIO_CLIENT_ID`, `RIPIO_CLIENT_SECRET`, `RIPIO_CUSTOMER_ID`), it hands out the seller's own CVU instead. The API
+sandbox only delivers `RTEST` on Ethereum Sepolia, so it is used just for testing the notifications: try it from
+Telegram with *"simulá un pago de 5000"* (the agent reports the delivery and skips the Celo settlement).
 
 ## What's next
 

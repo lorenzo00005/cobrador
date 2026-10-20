@@ -7,7 +7,9 @@ services:
       STATE_FILE: /data/state.json
     volumes:
       - state:/data
-      - workflows:/app/.eve/.workflow-data
+      # Historial de conversaciones. "workflows" (el anterior) quedó trabado por una imagen en el chat;
+      # se conserva intacto como respaldo y se arranca con uno limpio.
+      - chats:/app/.eve/.workflow-data
     restart: unless-stopped
 
   tunnel:
@@ -27,3 +29,4 @@ services:
 volumes:
   state:
   workflows:
+  chats:

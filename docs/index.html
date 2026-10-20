@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cobrador — get paid in pesos, keep dollars</title>
+<meta name="description" content="A Telegram agent for Argentine sellers: customers pay pesos through Ripio, the agent settles every payment on Celo mainnet (wARS → USD₮) straight to the seller's wallet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbfaf6; --surface: #ffffff; --ink: #14140f; --muted: #5d5d52; --line: #e7e5dc;
+    --accent: #2a7d4f; --accent-ink: #ffffff; --highlight: #fcff52; --bubble-me: #e3f6d6; --bubble-bot: #ffffff;
+    --chat-bg: #d9e4cf; --warn-bg: #fff6d6; --warn-line: #f0d77a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11120f; --surface: #1a1b17; --ink: #f1f0ea; --muted: #a7a698; --line: #2c2d27;
+      --accent: #4fc184; --accent-ink: #0d1a12; --highlight: #fcff52; --bubble-me: #2b4a2a; --bubble-bot: #23241f;
+      --chat-bg: #1b2a1d; --warn-bg: #2a2614; --warn-line: #5c5121;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 Inter, system-ui, sans-serif; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+  .brand { font-weight: 800; font-size: 20px; letter-spacing: -0.02em; text-decoration: none; color: var(--ink); }
+  .brand span { background: var(--highlight); color: #14140f; padding: 0 6px; border-radius: 6px; }
+  nav a { margin-left: 18px; color: var(--muted); text-decoration: none; font-size: 15px; }
+  nav a:hover { color: var(--ink); }
+  .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; padding: 40px 0 64px; }
+  .eyebrow { display: inline-block; font-size: 13px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; margin-bottom: 18px; }
+  h1 { font-size: clamp(36px, 6vw, 58px); line-height: 1.05; letter-spacing: -0.035em; margin: 0 0 18px; }
+  h1 em { font-style: normal; background: linear-gradient(transparent 62%, var(--highlight) 62%); color: inherit; }
+  @media (prefers-color-scheme: dark) { h1 em { background: none; color: var(--highlight); } }
+  .lede { font-size: 19px; color: var(--muted); margin: 0 0 28px; max-width: 34em; }
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 12px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--ink); background: var(--surface); cursor: pointer; font-size: 16px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn:focus-visible, input:focus-visible { outline: 3px solid var(--highlight); outline-offset: 2px; }
+  section { padding: 56px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(26px, 4vw, 36px); letter-spacing: -0.025em; margin: 0 0 10px; line-height: 1.15; }
+  .sub { color: var(--muted); margin: 0 0 32px; max-width: 40em; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: s; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+  .steps .card::before { counter-increment: s; content: counter(s); display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--highlight); color: #14140f; font-weight: 700; margin-bottom: 12px; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  /* chat */
+  .phone { background: var(--chat-bg); border-radius: 24px; padding: 14px; border: 1px solid var(--line); box-shadow: 0 20px 50px -30px rgba(0,0,0,.35); }
+  .chat-head { display: flex; align-items: center; gap: 10px; background: var(--surface); border-radius: 14px; padding: 10px 12px; margin-bottom: 12px; }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #f9a03f, #f26b3a); color: #fff; display: grid; place-items: center; font-weight: 700; }
+  .chat-head small { display: block; color: var(--muted); font-size: 12px; line-height: 1.2; }
+  .msg { max-width: 88%; padding: 9px 12px; border-radius: 14px; margin: 6px 0; font-size: 14.5px; line-height: 1.45; white-space: pre-line; word-wrap: break-word; }
+  .msg.me { margin-left: auto; background: var(--bubble-me); border-bottom-right-radius: 4px; }
+  .msg.bot { background: var(--bubble-bot); border-bottom-left-radius: 4px; }
+  .msg.reply { border-left: 3px solid var(--accent); }
+  .msg code { font-size: 12.5px; word-break: break-all; }
+  .note { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: 10px; }
+  /* checkout */
+  .checkout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  form.pay { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 24px; }
+  label { display: block; font-weight: 600; margin-bottom: 8px; }
+  .amount { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; background: var(--bg); }
+  .amount span { color: var(--muted); font-weight: 600; }
+  .amount input { flex: 1; border: 0; background: transparent; color: var(--ink); font: 600 24px Inter, sans-serif; padding: 12px 8px; min-width: 0; }
+  .amount input:focus { outline: none; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 18px; }
+  .chip { border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: 500 14px Inter, sans-serif; cursor: pointer; }
+  .warn { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin: 18px 0 0; }
+  .err { color: #c0392b; font-size: 14px; min-height: 1.4em; margin: 8px 0 0; }
+  @media (prefers-color-scheme: dark) { .err { color: #ff8a7a; } }
+  .flow { list-style: none; padding: 0; margin: 0; }
+  .flow li { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+  .flow li:last-child { border: 0; }
+  .flow b { min-width: 92px; }
+  /* proof */
+  .proof { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .proof .card a { word-break: break-all; font-size: 14px; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; margin-bottom: 8px; }
+  .stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  ul.guard { padding-left: 20px; margin: 0; color: var(--muted); }
+  ul.guard li { margin: 6px 0; }
+  ul.guard b { color: var(--ink); }
+  footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+  @media (max-width: 860px) {
+    .hero, .checkout { grid-template-columns: 1fr; gap: 32px; }
+    .steps, .stack { grid-template-columns: 1fr 1fr; }
+    .proof { grid-template-columns: 1fr; }
+    nav a:not(.gh) { display: none; }
+  }
+  @media (max-width: 520px) { .steps, .stack { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#">Cobra<span>dor</span></a>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="#try">Try it</a>
+      <a href="#proof">On-chain proof</a>
+      <a class="gh" href="https://github.com/lorenzo00005/cobrador">GitHub ↗</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Agents on Open Rails · Stable Agents: LatAm (Ripio × Celo)</div>
+      <h1>Get paid in pesos.<br><em>Keep dollars.</em></h1>
+      <p class="lede">Cobrador is a Telegram agent for small Argentine sellers. Customers pay the way they already do, pesos by transfer through Ripio, and the agent settles every payment on Celo mainnet: <b>wARS → USD₮</b>, straight to the seller's wallet. No exchange, no manual conversion, no crypto knowledge.</p>
+      <div class="btns">
+        <a class="btn primary" href="#try">Try the checkout</a>
+        <a class="btn" href="https://github.com/lorenzo00005/cobrador">View the code</a>
+      </div>
+    </div>
+
+    <div class="phone" aria-label="Example Telegram conversation">
+      <div class="chat-head"><div class="avatar">C</div><div><b>Cobrador</b><small>bot</small></div></div>
+      <div class="msg me">Cobrale 15.000 a Juan por la remera</div>
+      <div class="msg bot">Listo, registré "remera" por $15.000.
+Pasale este link a Juan: paga en pesos con Ripio y la plata te llega sola.
+<code>ramp.ripio.com/?country=AR&amp;chain=42220&amp;token=WARS&amp;amount=15000…</code></div>
+      <div class="msg bot">✅ Ya recibí la plata de remera: $15.000 ARS.
+Ahora la convierto a USD₮ y te la mando a tu wallet.</div>
+      <div class="msg bot reply">💸 Ya mandé la plata de remera a tu wallet.
+15000 wARS → … USD₮
+Swap: celoscan.io/tx/…
+Envío: celoscan.io/tx/…</div>
+      <p class="note">Example conversation. The ✅ and 💸 messages are fixed templates sent by code, not written by the LLM.</p>
+    </div>
+  </div>
+
+  <section id="how">
+    <h2>How it works</h2>
+    <p class="sub">The seller only talks to the agent in Spanish on Telegram. Everything that moves money runs in deterministic code, triggered by on-chain events.</p>
+    <div class="steps">
+      <div class="card"><h3>Charge</h3><p>The seller says what they sold and for how much. The agent registers the sale and returns a Ripio payment link (or the seller's own CVU via the Ripio Ramps API).</p></div>
+      <div class="card"><h3>Customer pays</h3><p>The customer pays pesos through Ripio. Ripio converts them to <b>wARS</b> and delivers them to the agent wallet on Celo.</p></div>
+      <div class="card"><h3>Settle</h3><p>The agent detects the wARS, takes an RFQ quote on <b>Textile FX</b>, swaps wARS → USD₮ and sends the USD₮ to the seller. Gas is paid in USD₮.</p></div>
+      <div class="card"><h3>Report</h3><p>"✅ Payment received for <i>product</i>", then a reply "💸 Sent to your wallet" with Celoscan links.</p></div>
+    </div>
+  </section>
+
+  <section id="try">
+    <div class="checkout">
+      <div>
+        <h2>Try it: pay the demo seller</h2>
+        <p class="sub">This is the exact link the agent hands to a customer. Enter an amount and you go straight into Ripio's on-ramp, with the agent wallet on Celo as the destination.</p>
+        <ul class="flow">
+          <li><b>You</b><span>pay pesos through Ripio (bank transfer).</span></li>
+          <li><b>Ripio</b><span>delivers wARS to the agent wallet on Celo mainnet.</span></li>
+          <li><b>Cobrador</b><span>swaps wARS → USD₮ on Textile FX and sends it to the seller.</span></li>
+          <li><b>On-chain</b><span>every transaction carries the ERC-8021 attribution tag.</span></li>
+        </ul>
+      </div>
+      <form class="pay" id="pay" novalidate>
+        <label for="amt">Amount to pay</label>
+        <div class="amount"><span>ARS $</span><input id="amt" inputmode="numeric" autocomplete="off" placeholder="5.000" aria-describedby="err"></div>
+        <div class="chips" role="group" aria-label="Quick amounts">
+          <button type="button" class="chip" data-v="3000">$3.000</button>
+          <button type="button" class="chip" data-v="5000">$5.000</button>
+          <button type="button" class="chip" data-v="10000">$10.000</button>
+        </div>
+        <button class="btn primary" type="submit" style="width:100%;justify-content:center">Pay with Ripio →</button>
+        <p class="err" id="err" role="alert"></p>
+        <div class="warn"><b>Real money.</b> This opens Ripio's live on-ramp: you pay real pesos and the wARS go to the demo agent on Celo mainnet, which settles them to the demo seller's wallet. Ripio may ask you to sign in and verify your identity.</div>
+      </form>
+    </div>
+  </section>
+
+  <section id="proof">
+    <h2>Live on Celo mainnet</h2>
+    <p class="sub">Real transactions sent by the agent wallet, each tagged with the entry's ERC-8021 attribution code.</p>
+    <div class="proof">
+      <div class="card"><div class="tag">Agent wallet</div><br><a href="https://celoscan.io/address/0x8b9a7c5D0B83e984061A989C76f035e81E1E55f3">0x8b9a7c5D0B83e984061A989C76f035e81E1E55f3</a></div>
+      <div class="card"><div class="tag">ERC-8004 identity · agent #9983</div><br><a href="https://celoscan.io/tx/0x3f39d9e75f3739bd594681408975bb4e856ec5422184e652df39df0a06a61783">0x3f39d9e75f3739bd594681408975bb4e856ec5422184e652df39df0a06a61783</a></div>
+      <div class="card"><div class="tag">USD₮ settlement to the seller</div><br><a href="https://celoscan.io/tx/0xaa26e99d50c8299e915e25d7bafb10004086402afd6382cf5a1ef2c52096831c">0xaa26e99d50c8299e915e25d7bafb10004086402afd6382cf5a1ef2c52096831c</a></div>
+      <div class="card"><div class="tag">USD₮ settlement to the seller</div><br><a href="https://celoscan.io/tx/0x7e0cd4d3a652a1cb710bb427dc39eb8562215048df287fc6d420c37901b1e389">0x7e0cd4d3a652a1cb710bb427dc39eb8562215048df287fc6d420c37901b1e389</a></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Built on Celo's open rails</h2>
+    <p class="sub">&nbsp;</p>
+    <div class="stack">
+      <div class="card"><h3>Ripio wARS</h3><p>Argentine peso stablecoin on Celo mainnet: every payment arrives and settles from wARS.</p></div>
+      <div class="card"><h3>Ripio on-ramp</h3><p>ramp.ripio.com links, plus the Ripio Ramps API (CVU per seller, order polling, signed webhooks).</p></div>
+      <div class="card"><h3>Textile FX</h3><p>RFQ swaps wARS → USD₮ on Celo mainnet.</p></div>
+      <div class="card"><h3>Fee abstraction</h3><p>Gas paid in USD₮: the agent wallet never needs CELO.</p></div>
+      <div class="card"><h3>ERC-8021</h3><p>Attribution tag on every transaction the agent sends.</p></div>
+      <div class="card"><h3>ERC-8004</h3><p>On-chain agent identity #9983, owned by the agent wallet.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Guardrails</h2>
+    <p class="sub">An agent that moves someone's money has to be boring in the right places.</p>
+    <ul class="guard">
+      <li><b>Owner only.</b> The Telegram channel ignores every chat except the seller's.</li>
+      <li><b>Money moves in code, never by chat.</b> Settlement runs on payment events; tools that move or redirect funds need an explicit confirmation button.</li>
+      <li><b>No hallucinated numbers.</b> Payment and settlement messages are fixed templates with real amounts and hashes.</li>
+      <li><b>Idempotent.</b> A duplicated event never swaps twice. Per-settlement cap and a USD₮ gas buffer so the final transfer never reverts.</li>
+      <li><b>Prompt-injection aware.</b> Event data is treated as data, never as instructions.</li>
+    </ul>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">Cobrador · built for the Agents on Open Rails Hackathon · <a href="https://github.com/lorenzo00005/cobrador">github.com/lorenzo00005/cobrador</a> · Hecho en Argentina 🇦🇷</div>
+</footer>
+
+<script>
+  // Mismo link que arma el agente (agent/lib/ramp.ts): formato documentado por Ripio.
+  const AGENT_WALLET = "0x8b9a7c5D0B83e984061A989C76f035e81E1E55f3";
+  const input = document.getElementById("amt");
+  const err = document.getElementById("err");
+  const fmt = (n) => n.toLocaleString("es-AR");
+
+  input.addEventListener("input", () => {
+    const digits = input.value.replace(/\D/g, "").slice(0, 9);
+    input.value = digits ? fmt(Number(digits)) : "";
+    err.textContent = "";
+  });
+  document.querySelectorAll(".chip").forEach((b) =>
+    b.addEventListener("click", () => { input.value = fmt(Number(b.dataset.v)); err.textContent = ""; input.focus(); })
+  );
+  document.getElementById("pay").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const amount = Number(input.value.replace(/\D/g, ""));
+    if (!amount) { err.textContent = "Enter an amount in pesos."; input.focus(); return; }
+    const url = new URL("https://ramp.ripio.com/");
+    url.search = new URLSearchParams({ country: "AR", chain: "42220", token: "WARS", amount: String(amount), address: AGENT_WALLET });
+    window.open(url.toString(), "_blank", "noopener");
+  });
+</script>
+</body>
+</html>
